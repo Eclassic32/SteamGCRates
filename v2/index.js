@@ -1,11 +1,11 @@
 const myCur = checkLS("currency", "KZT");
-const roundTo = checkLS("roundTo", 0);
+const roundTo = checkLS("roundTo", 2);
 const sortBy = checkLS("sort", "rate");
 
 var products = [];
 var auctions = {};
 
-var endData = new Array();
+var endData = JSON.parse(checkLS("data", false, false));
 
 main();
 
@@ -13,9 +13,22 @@ async function main() {
     // get currency rates
     const currency = (await fetch('currency.json')).json();
 
-    // get eneba pages
-    const file = (await fetch('../pages/page1.html')).text();
-    jsonToPA(htmlToJSON(await file));
+    // if endData empty get eneba pages
+    if (JSON.stringify(endData) == "false") {
+        endData = new Array();
+        var pageNum = 1;
+
+        const url = 'https://www.eneba.com/store/all?drms[]=steam%20gift%20card&types[]=giftcard&regions';
+
+        console.log("data not found");
+
+        for (let i = 0; i < pageNum; i++) {
+            const file = (await fetch(`../pages/page${i+1}.html`)).text();
+            if (pageNum == 1)
+                pageNum = findLastPage(await file);
+            jsonToPA(htmlToJSON(await file));
+        } 
+    }  
 
     // write gotten data into array
     for (const value in products) {
@@ -24,6 +37,10 @@ async function main() {
             endData.push(findData(element));
         }
     }
+
+    console.log(endData);
+
+    localStorage.setItem("data", JSON.stringify(endData));
 
     // sort and display data
     writeCurrencyData(await currency);
@@ -37,6 +54,10 @@ function htmlToJSON(file){
 
     return item[0].text;
 } 
+
+function findLastPage(file) {
+    return ($(file).find('li.rc-pagination-next').prev().find('a'))[0].text
+}
 
 function jsonToPA(text){
     const data = JSON.parse(text);
@@ -87,13 +108,12 @@ function writeCurrencyData(currency){
 }
 
 function displayData(){
-    const sortedItems = endData.sort((a, b) => b[sortBy] - a[sortBy]);
-    console.log(sortedItems);
+    endData.sort((a, b) => b[sortBy] - a[sortBy]);
 
     for (let i = 0; i < endData.length; i++) {
         const el = endData[i];
         
-        $('tbody').append(`<tr><th>${el.id}</th><td>${el.country}</td><td>${el.region}</td>
+        $('tbody').append(`<tr><th>${i+1}</th><td>${el.country}</td><td>${el.region}</td>
         <td>${el.amount} ${el.currency}</td><td>${el.price} EUR</td><td>${el.AtoLocal} ${myCur}</td><td>${el.PtoLocal} ${myCur}</td>
         <td>${el.rate}</td><td><a href="${el.link}"> Link </a></td></tr>`)
     }
@@ -101,12 +121,15 @@ function displayData(){
     
 }
 
-function checkLS(name, def){
-    if (localStorage.getItem(name) == null || localStorage.getItem(name) == undefined || localStorage.getItem(name) == '' || localStorage.getItem(name) == '{}' || localStorage.getItem(name) == '[]'){
+function checkLS(name, def, sendDev = true){
+    if (    localStorage.getItem(name) == null || localStorage.getItem(name) == false || 
+            localStorage.getItem(name) == undefined || localStorage.getItem(name) == '' || 
+            localStorage.getItem(name) == '{}' || localStorage.getItem(name) == '[]')
+    {
         console.log(`Couldn't find '${name}' in Local Storage. Applying default '${def}'`);
         localStorage.setItem(name, def);
         return def;
     }
-    console.log(`Fonud '${name}' in Local Storage: ` + localStorage.getItem(name));
+    (sendDev) ? console.log(`Fonud '${name}' in Local Storage: ` + localStorage.getItem(name)) : console.log(`Fonud '${name}' in Local Storage. (sendDev = false)`);
     return localStorage.getItem(name);
 }
