@@ -37,7 +37,7 @@ async function fun() {
 }
 
 function checkLS(name){
-    return localStorage.getItem(name) != null || localStorage.getItem(name) != undefined;
+    return localStorage.getItem(name) != null || localStorage.getItem(name) != undefined || localStorage.getItem(name) != '' || localStorage.getItem(name) != '{}' || localStorage.getItem(name) != '[]';
 }
 
 async function fetchData(link) {
