@@ -2,13 +2,13 @@ import fs from "fs";
 import fetch from 'node-fetch';
 
 const site = 'https://www.eneba.com/store/all';
-const urlParam = 'drms[]=steam%20gift%20card&rangeTo=32&types[]=giftcard&regions';
-const pageNum = 13;
+const urlParam = 'drms[]=steam%20gift%20card&types[]=giftcard&regions';
+const pageNum = 4;
 
 func();
 
 async function func() {
-    for (let page = 1; page <= pageNum; page++) {
+    for (let page = 4; page <= pageNum; page++) {
         const respose = await fetch(`${site}?page=${page}&${urlParam}`);
         const result = await respose.text();
         

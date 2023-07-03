@@ -10,6 +10,12 @@
             flex-direction: column;
             flex-wrap: nowrap;
             align-items: stretch;
+
+            margin: 10px 20px;
+        }
+
+        table {
+            margin: 15px 0;
         }
 
         table, td, th {
@@ -22,6 +28,7 @@
 </head>
 <body>
     <div class="settings">
+        <p><b>Number of items:</b> <span id="foundItems">Number</span></p>
         <button onclick="localStorage.setItem('data', '')">clear</button>
     </div>
     <table>

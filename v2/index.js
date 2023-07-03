@@ -18,11 +18,12 @@ async function main() {
         endData = new Array();
         var pageNum = 1;
 
-        const url = 'https://www.eneba.com/store/all?drms[]=steam%20gift%20card&types[]=giftcard&regions';
+        // const url = 'https://www.eneba.com/store/all?drms[]=steam%20gift%20card&types[]=giftcard&regions';
 
         console.log("data not found");
 
         for (let i = 0; i < pageNum; i++) {
+            // const file = (await fetch(`${url}&page=${i+1}`)).text(); // not working eneba fetch
             const file = (await fetch(`../pages/page${i+1}.html`)).text();
             if (pageNum == 1)
                 pageNum = findLastPage(await file);
@@ -65,6 +66,8 @@ function jsonToPA(text){
 
     for (const key in data) {
         if (key.includes('Product')) {
+            if (data[key].cheapestAuction == null) 
+                continue;
             products.push(data[key]);
         }
         else {
@@ -73,16 +76,17 @@ function jsonToPA(text){
     }
 }
 
-function findData(element) {
-    var data = {};
-    data.id = endData.length + 1;
-    data.name = element.name;
-    data.region = element.regions[0].name;
-    data.country = element.name.match(/\b[A-Z]+\b/g).slice(1).join(' ');
-    data.currency = element.name.match(/\b[A-Z]+\b/g)[0];
-    data.amount = parseInt(element.name.match(/(\d+)/g)[0]);
-    data.price = (auctions[element.cheapestAuction.__ref].amount) / 100;
-    data.link = `https://eneba.com/${element.slug}`
+function findData(item) {
+
+    var data = {
+        id       : endData.length + 1,
+        name     : item.name,
+        region   : item.regions[0].name,
+        country  : item.name.match(/\b[A-Z]+\b/g).slice(1).join(' '),
+        currency : item.name.match(/\b[A-Z]+\b/g)[0],
+        amount   : parseInt(item.name.match(/(\d+)/g)[0]),
+        price    : (auctions[item.cheapestAuction.__ref].amount) / 100,
+        link     : `https://eneba.com/${item.slug}`};
 
     // console.log(data);
     return data;
@@ -109,6 +113,8 @@ function writeCurrencyData(currency){
 
 function displayData(){
     endData.sort((a, b) => b[sortBy] - a[sortBy]);
+
+    $("#foundItems").text(endData.length)
 
     for (let i = 0; i < endData.length; i++) {
         const el = endData[i];
