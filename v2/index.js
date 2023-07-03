@@ -1,6 +1,10 @@
 const myCur = checkLS("currency", "KZT");
 const roundTo = checkLS("roundTo", 2);
 const sortBy = checkLS("sort", "rate");
+const sortText = checkLS("sortText", false)
+
+const maxPrice = 0;
+const minPrice = 0;
 
 var products = [];
 var auctions = {};
@@ -112,12 +116,22 @@ function writeCurrencyData(currency){
 }
 
 function displayData(){
-    endData.sort((a, b) => b[sortBy] - a[sortBy]);
 
-    $("#foundItems").text(endData.length)
+    if (sortText) 
+        endData.sort(function(a, b) {
+            return a[sortBy].localeCompare(b[sortBy]);
+        });
+    else 
+        endData.sort((a, b) => b[sortBy] - a[sortBy]);
 
-    for (let i = 0; i < endData.length; i++) {
-        const el = endData[i];
+    const sortedData = endData.filter(function(obj) {
+        return (obj.price <= maxPrice || maxPrice == 0) && (obj.price >= minPrice);
+    })
+
+    $("#foundItems").text(sortedData.length)
+
+    for (let i = 0; i < sortedData.length; i++) {
+        const el = sortedData[i];
         
         $('tbody').append(`<tr><th>${i+1}</th><td>${el.country}</td><td>${el.region}</td>
         <td>${el.amount} ${el.currency}</td><td>${el.price} EUR</td><td>${el.AtoLocal} ${myCur}</td><td>${el.PtoLocal} ${myCur}</td>
