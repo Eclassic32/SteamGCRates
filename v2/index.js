@@ -81,13 +81,12 @@ function jsonToPA(text){
 }
 
 function findData(item) {
-
     var data = {
         id       : endData.length + 1,
         name     : item.name,
         region   : item.regions[0].name,
-        country  : item.name.match(/\b[A-Z]+\b/g).slice(1).join(' '),
-        currency : item.name.match(/\b[A-Z]+\b/g)[0],
+        country  : item.name.match(/[A-Z]+\b/g).slice(1).join(' '),
+        currency : item.name.match(/[A-Z]+\b/g)[0],
         amount   : parseInt(item.name.match(/(\d+)/g)[0]),
         price    : (auctions[item.cheapestAuction.__ref].amount) / 100,
         link     : `https://eneba.com/${item.slug}`};
